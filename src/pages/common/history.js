@@ -6,7 +6,6 @@ const lastNavigationTimeStamps = {};
  * @param path
  */
 function validate(path) {
-  console.log('@@@@@ instance path', path)
   const timestamp = new Date().valueOf();
   if(lastNavigationTimeStamps[path] && (timestamp - lastNavigationTimeStamps[path]) < NAVIGATION_THROTTLE) {
     lastNavigationTimeStamps[path] = timestamp
@@ -18,6 +17,12 @@ function validate(path) {
   return true
 }
 
+/**
+ * 处理路由跳转的状态
+ * @param prevState
+ * @param newState
+ * @param action
+ */
 export function handleNavigationChange(prevState, newState, action) {
   console.log('@@@@@ prevState', prevState)
   console.log('@@@@@ newState', newState)
