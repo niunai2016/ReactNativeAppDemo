@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import {View, Text, TouchableOpacity, StyleSheet} from 'react-native'
-import NaviBar from '../../component/navi-bar';
+import NaviBar from '../../components/navi-bar';
 import history from '../../common/history';
 import {colors} from '../../assets/styles/colors-theme';
 
