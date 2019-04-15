@@ -2,10 +2,10 @@ import React from 'react'
 import Icon from 'react-native-vector-icons/Ionicons'
 import {createBottomTabNavigator} from 'react-navigation';
 
-import Home from '../home/home';
-import Page3 from '../page3/page3';
-import Page1 from '../page1/page1';
-import Page2 from '../page2/page2';
+import Home from '../pages/home/home';
+import Page3 from '../pages/page3/page3';
+import Page1 from '../pages/page1/page1';
+import Page2 from '../pages/page2/page2';
 import {colors} from '../assets/styles/colors-theme';
 
 const TabRouterMap = {

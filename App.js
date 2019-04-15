@@ -10,8 +10,8 @@ import React, {Component} from 'react';
 import {StatusBar} from 'react-native';
 import {SafeAreaView} from 'react-navigation'
 import Router from './src/router';
-import {colors} from './src/pages/assets/styles/colors-theme';
-import {handleNavigationChange} from './src/pages/common/history';
+import {colors} from './src/assets/styles/colors-theme';
+import {handleNavigationChange} from './src/common/history';
 
 export default class App extends Component {
   render() {

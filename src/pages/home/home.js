@@ -1,14 +1,14 @@
 import React, { Component } from 'react'
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native'
-import {colors} from '../assets/styles/colors-theme';
-import history from '../common/history';
+import {colors} from '../../assets/styles/colors-theme';
+import history from '../../common/history';
 
 export default class Home extends Component {
   render() {
     return (
       <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
         <Text>Home</Text>
-        <TouchableOpacity style={styles.button} onPress={() => history.push(this, '/list', {name: 'cangnaiwen'})}>
+        <TouchableOpacity style={styles.button} onPress={() => history.push(this, '/list', {name: 'niunai'})}>
           <Text style={styles.buttonText}>跳转到List</Text>
         </TouchableOpacity>
       </View>
