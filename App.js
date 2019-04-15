@@ -7,10 +7,10 @@
  */
 
 import React, {Component} from 'react';
-import {Platform, StyleSheet, Text, View, StatusBar} from 'react-native';
+import {StatusBar} from 'react-native';
 import {SafeAreaView} from 'react-navigation'
-import Router from "./src/router";
-import {colors} from "./src/pages/assets/styles/colors-theme";
+import Router from './src/router';
+import {colors} from './src/pages/assets/styles/colors-theme';
 
 export default class App extends Component {
   render() {
