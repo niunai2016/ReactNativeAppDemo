@@ -11,6 +11,7 @@ import {StatusBar} from 'react-native';
 import {SafeAreaView} from 'react-navigation'
 import Router from './src/router';
 import {colors} from './src/pages/assets/styles/colors-theme';
+import {handleNavigationChange} from './src/pages/common/history';
 
 export default class App extends Component {
   render() {
@@ -28,7 +29,9 @@ export default class App extends Component {
           backgroundColor={colors.statusBarColor}
           translucent={true}
         />
-        <Router/>
+        <Router
+          onNavigationStateChange={handleNavigationChange}
+        />
       </SafeAreaView>
     );
   }
