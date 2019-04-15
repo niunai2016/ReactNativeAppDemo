@@ -1,11 +1,12 @@
 import React from 'react'
 import Icon from 'react-native-vector-icons/Ionicons'
-import {createBottomTabNavigator} from "react-navigation";
+import {createBottomTabNavigator} from 'react-navigation';
 
-import Home from "../home/home";
-import Page3 from "../page3/page3";
-import Page1 from "../page1/page1";
-import Page2 from "../page2/page2";
+import Home from '../home/home';
+import Page3 from '../page3/page3';
+import Page1 from '../page1/page1';
+import Page2 from '../page2/page2';
+import {colors} from '../assets/styles/colors-theme';
 
 const TabRouterMap = {
   home: {
@@ -16,7 +17,7 @@ const TabRouterMap = {
         <Icon
           focused={focused}
           name="md-close-circle"
-          color={focused ? '#00f' : '#000'}
+          color={focused ? colors.statusBarColor : '#000'}
         />
       )
     }
@@ -29,7 +30,7 @@ const TabRouterMap = {
         <Icon
           focused={focused}
           name="md-close-circle"
-          color={focused ? '#00f' : '#000'}
+          color={focused ? colors.statusBarColor : '#000'}
         />
       )
     }
@@ -42,7 +43,7 @@ const TabRouterMap = {
         <Icon
           focused={focused}
           name="md-close-circle"
-          color={focused ? '#00f' : '#000'}
+          color={focused ? colors.statusBarColor : '#000'}
         />
       )
     }
@@ -55,7 +56,7 @@ const TabRouterMap = {
         <Icon
           focused={focused}
           name="md-close-circle"
-          color={focused ? '#00f' : '#000'}
+          color={focused ? colors.statusBarColor : '#000'}
         />
       )
     }
@@ -66,7 +67,7 @@ export const TabNav = createBottomTabNavigator(TabRouterMap,{
   initialRouteName: 'home',
   tabBarOptions: {
     //当前选中的tab bar的文本颜色和图标颜色
-    activeTintColor: '#00f',
+    activeTintColor: colors.statusBarColor,
     //当前未选中的tab bar的文本颜色和图标颜色
     inactiveTintColor: '#000',
     //是否显示tab bar的图标，默认是false
