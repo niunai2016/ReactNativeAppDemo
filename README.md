@@ -44,7 +44,7 @@ $ react-native link react-native-gesture-handler
 
 **路由组件封装**
 
-1.根目录新建`src/pages/`目录，在`pages`下新建`home\home.js`
+1.根目录新建`src/pages/`目录，在`pages`下新建`home/home.js`
 
 a）`home.js`示例：（所用的<a href="#history">history</a>及<a href="#colors">colors</a>在后文也有示例）
 
@@ -82,7 +82,7 @@ const styles = StyleSheet.flatten({
 })
 ```
 
-b）在`pages`下新建`page1\page1.js`、`page2\page2.js`、`page3\page3.js`、`list\list.js`、`detail\detail.js`，示例如下：（仅写一个示例，其他自行模仿）
+b）在`pages`下新建`page1/page1.js`、`page2/page2.js`、`page3/page3.js`、`list/list.js`、`detail/detail.js`，示例如下：（仅写一个示例，其他自行模仿）
 
 `page1`示例:
 
@@ -337,13 +337,75 @@ import Icon from 'react-native-vector-icons/Ionicons'
 
 ## 其他配置
 **<a name="colors">1.样式配置</a>**
-`src`目录下新建`assets\styles\colors-theme.js`示例：全局控制整个APP所需的颜色
+`src`目录下新建`assets/styles/colors-theme.js`示例：全局控制整个APP所需的颜色
 
 ```
 export const colors = {
   statusBarColor: '#23A2FF'
 }
 ```
+
+**<a name="constants">2.服务基础配置</a>**
+`src/common`目录下新建`constants.js`, 用于配置全局所需的服务地址、设备号、设备类型、版本号、分页数量等等
+
+```
+(如果不需要设备号则无需下载)
+$ yarn add react-native-device-info
+$ react-native link react-native-device-info
+
+
+/**
+ * 提供基础配置信息
+ * constants.js 提供如服务器地址、分页数量、设备类型、设备号、版本号等配置
+ */
+import { Platform } from 'react-native'
+import DeviceInfo from 'react-native-device-info'
+
+export default {
+  serverUrl: 'http://127.0.0.1:3600/portal',
+  pageSize: 10,
+  deviceType: Platform.OS.toUpperCase(),
+  deviceNo: DeviceInfo.getUniqueID().replace('-').substr(0, 12),
+  versionName: DeviceInfo.getVersion(), //也可写死如'1.0.0'
+}
+
+```
+
+**<a name="serviceError">3.服务报错配置</a>**
+`src/common`目录下新建`service-error.js`, 用于配置全局服务报错
+
+```
+/**
+ * 服务报错处理
+ */
+
+export default class ServiceError extends Error{
+  constructor(code, message){
+    super(message);
+    this.code = code;
+    this.hash = Math.random() * 100000000000000000;
+    this.signature = 'ServiceError';
+  }
+}
+```
+
+**<a name="code">4.code配置</a>**
+`src/common`目录下新建`code.js`, 用于配置全局请求code
+
+```
+/**
+ * code.js提供全局的请求服务字段处理
+ */
+export default {
+  SUCCESS: 'SUCCESS', //请求成功
+  REQUEST_FAILED: 'REQUEST_FAILED', //请求失败
+  REQUEST_TIMEOUT: 'REQUEST_TIMEOUT', //请求超时
+  UN_KNOWN_ERROR: 'UN_KNOWN_ERROR', //未知错误
+  TOKEN_INVALID: 'TOKEN_INVALID', //token失效
+  SESSION_TIMEOUT: 'SESSION_TIMEOUT', //会话超时
+}
+```
+
 
 ## 封装顶部导航栏NaviBar
 顶部导航栏用于显示当前页面的标题，操作路由的跳转，放置部分功能模块，如分享、弹框、设置等
@@ -382,13 +444,15 @@ export default class NaviBar extends Component {
         <View style={{width: 40}}>
           {
             props.leftItem ? props.leftItem : (
-              <TouchableOpacity style={{paddingLeft: 15}} onPress={props.onBack}>
-                <Icon
-                  name="md-arrow-back"
-                  size={20}
-                  color={props.iconColor || '#ffffff'}
-                />
-              </TouchableOpacity>
+              props.onBack ? (
+                <TouchableOpacity style={{paddingLeft: 15}} onPress={props.onBack}>
+                  <Icon
+                    name="md-arrow-back"
+                    size={20}
+                    color={props.iconColor || '#ffffff'}
+                  />
+                </TouchableOpacity>
+              ) : <View/>
             )
           }
         </View>
@@ -413,6 +477,7 @@ const styles = StyleSheet.flatten({
     justifyContent: 'space-between'
   }
 })
+
 ```
 
 修改`list.js`,示例如下：
@@ -457,4 +522,171 @@ const styles = StyleSheet.flatten({
   }
 })
 ```
+
+## 基础服务请求返回封装
+一般来说，大项目都需要统一封装一个基础服务组件，通过这个组件去全局处理request和返回response，处理全局的服务报错。
+
+1.`fetch`拦截器的实现：
+```
+$ yarn add fetch-intercept
+
+示例如下：
+import fetchIntercept from 'fetch-intercept'
+
+fetchIntercept.register({
+  request: function (url, config) {
+    return [url, config];
+  },
+  requestError: function (error) {
+    return Promise.reject(error);
+  },
+  response: function (res) {
+    return res;
+  },
+  responseError: function (error) {
+    return Promise.reject(error);
+  }
+});
+
+```
+
+2.在`src`下新建`services/base-service.js`,封装`BaseService`（<a href="#constants">constants</a>、<a href="#serviceError">ServiceError</a>、<a href="#code">code</a>的封装在上面）
+
+```
+/**
+ * 基础服务类封装
+ * BaseService
+ */
+import fetchIntercept from 'fetch-intercept'
+import constants from '../common/constants';
+import ServiceError from '../common/service-error';
+import code from '../common/code';
+
+const fetchApi = fetch; // eslint-disable-line
+
+fetchIntercept.register({
+  request: function (url, config) {
+    return [url, config];
+  },
+  requestError: function (error) {
+    return Promise.reject(error);
+  },
+  response: function (res) {
+    return res;
+  },
+  responseError: function (error) {
+    return Promise.reject(error);
+  }
+});
+
+export default class BaseService {
+  constructor(props){
+    if(props && props.showLoading){
+      this.showLoading = props.showLoading;
+    }
+    if(props && props.hideLoading){
+      this.hideLoading = props.hideLoading;
+    }
+  }
+
+  async request(method, url, params, errorMsgIndex, showLoading = true, acceptType = 'application/json') {
+    // 如果url不全，则自动补全
+    if(url.indexOf('http://') < 0 && url.indexOf('https://') < 0){
+      url = constants.serverUrl + '/' + url;
+    }
+
+    if(showLoading  && this.showLoading){
+      this.showLoading();
+    }
+
+    let res = null
+
+    try {
+      const options = {
+        method: method,
+        credentials: 'include',
+        headers: {
+          'content-type': 'application/json',
+          'accept': acceptType,
+          'Cache-Control': 'no-cache'
+        }
+      }
+
+      if(method === 'POST' || method === 'PUT') {
+        params.DeviceType = constants.deviceType
+        params.DeviceNo = constants.deviceNo
+
+        options.body = JSON.stringify(params || {})
+      }
+
+      res = await fetchApi(url, options)
+    } catch (e) {
+      if(this.hideLoading){
+        this.hideLoading()
+      }
+
+      throw new ServiceError(code.REQUEST_FAILED, '网络请求失败')
+    }
+
+    if(res.status && res.status >= 200 && res.status < 300) {
+      const contentType = res.headers.get('Content-Type')
+
+      if(this.hideLoading){
+        this.hideLoading();
+      }
+
+      if(contentType.indexOf('text/plain') >= 0 || contentType.indexOf('text/html') >= 0){
+        return res.text()
+      }else{
+        const responseJson = await res.json();
+        if (responseJson && !responseJson.jsonError) {
+          return responseJson
+        } else {
+          throw new ServiceError(responseJson.jsonError[0]._exceptionMessageCode || code.REQUEST_FAILED, responseJson.jsonError[0]._exceptionMessage);
+        }
+      }
+    } else {
+      if(this.hideLoading){
+        this.hideLoading();
+      }
+
+      if (res.status === 401) {
+        throw new ServiceError(code.REQUEST_TIMEOUT, res.data.message);
+      } else if (res.ok) {
+        try {
+          const responseJson = await res.json();
+          const { message } = responseJson;
+          throw new ServiceError(code.REQUEST_FAILED, message);
+        } catch (e) {
+          throw new ServiceError(code.REQUEST_FAILED, '服务未知错误');
+        }
+      }
+    }
+  }
+
+  /**
+   * GET 后台数据
+   * @param url
+   * @param errorMsg 报错消息
+   * @returns {Promise<*>}
+   */
+  async fetchJson(url, errorMsg, showLoading = true){
+    return await this.request('GET', url, null, errorMsg, showLoading)
+  }
+
+  /**
+   * POST请求
+   * @param url
+   * @param params
+   * @param errorMsg 报错消息
+   * @returns {Promise.<void>}
+   */
+  async postJson(url, params, errorMsg, showLoading = true){
+    return await this.request('POST', url, params, errorMsg, showLoading)
+  }
+
+}
+
+```
+
 
