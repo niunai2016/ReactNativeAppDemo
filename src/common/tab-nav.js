@@ -16,7 +16,8 @@ const TabRouterMap = {
       tabBarIcon:({focused}) => (
         <Icon
           focused={focused}
-          name="md-close-circle"
+          size={24}
+          name="ios-home"
           color={focused ? colors.statusBarColor : '#000'}
         />
       )
@@ -29,7 +30,8 @@ const TabRouterMap = {
       tabBarIcon:({focused}) => (
         <Icon
           focused={focused}
-          name="md-close-circle"
+          size={24}
+          name="logo-nodejs"
           color={focused ? colors.statusBarColor : '#000'}
         />
       )
@@ -42,7 +44,8 @@ const TabRouterMap = {
       tabBarIcon:({focused}) => (
         <Icon
           focused={focused}
-          name="md-close-circle"
+          size={24}
+          name="ios-radio-button-off"
           color={focused ? colors.statusBarColor : '#000'}
         />
       )
@@ -55,7 +58,8 @@ const TabRouterMap = {
       tabBarIcon:({focused}) => (
         <Icon
           focused={focused}
-          name="md-close-circle"
+          size={24}
+          name="ios-square-outline"
           color={focused ? colors.statusBarColor : '#000'}
         />
       )
