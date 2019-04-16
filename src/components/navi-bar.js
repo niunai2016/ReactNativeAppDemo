@@ -25,13 +25,15 @@ export default class NaviBar extends Component {
         <View style={{width: 40}}>
           {
             props.leftItem ? props.leftItem : (
-              <TouchableOpacity style={{paddingLeft: 15}} onPress={props.onBack}>
-                <Icon
-                  name="md-arrow-back"
-                  size={20}
-                  color={props.iconColor || '#ffffff'}
-                />
-              </TouchableOpacity>
+              props.onBack ? (
+                <TouchableOpacity style={{paddingLeft: 15}} onPress={props.onBack}>
+                  <Icon
+                    name="md-arrow-back"
+                    size={20}
+                    color={props.iconColor || '#ffffff'}
+                  />
+                </TouchableOpacity>
+              ) : <View/>
             )
           }
         </View>
