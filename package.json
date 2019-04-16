@@ -7,9 +7,11 @@
     "test": "jest"
   },
   "dependencies": {
+    "fetch-intercept": "^2.3.1",
     "prop-types": "^15.7.2",
     "react": "16.8.3",
     "react-native": "0.59.4",
+    "react-native-device-info": "^1.5.0",
     "react-native-gesture-handler": "^1.1.0",
     "react-native-vector-icons": "^6.4.2",
     "react-navigation": "^3.7.1"
