@@ -12,8 +12,16 @@ import {SafeAreaView} from 'react-navigation'
 import Router from './src/router';
 import {colors} from './src/assets/styles/colors-theme';
 import {handleNavigationChange} from './src/common/history';
+import LoadingView from './src/common/loading';
 
 export default class App extends Component {
+  constructor(props) {
+    super(props)
+    this.state = {
+      loadingCount: 0
+    }
+  }
+
   render() {
     return (
       <SafeAreaView
@@ -32,6 +40,7 @@ export default class App extends Component {
         <Router
           onNavigationStateChange={handleNavigationChange}
         />
+        <LoadingView visible={this.state.loadingCount > 0} />
       </SafeAreaView>
     );
   }
