@@ -7,7 +7,6 @@
     "test": "jest"
   },
   "dependencies": {
-    "antd-mobile-rn": "^2.3.3",
     "fetch-intercept": "^2.3.1",
     "lottie-react-native": "^2.6.1",
     "prop-types": "^15.7.2",
@@ -23,7 +22,6 @@
     "@babel/runtime": "^7.4.3",
     "babel-eslint": "^10.0.1",
     "babel-jest": "^24.7.1",
-    "babel-plugin-import": "^1.11.0",
     "eslint": "^5.16.0",
     "eslint-config-prettier": "^4.1.0",
     "eslint-plugin-flowtype": "^3.6.1",
