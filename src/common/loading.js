@@ -11,7 +11,7 @@ export default class Loading extends Component {
       return (
         <View style={styles.wrapper}>
           <View style={styles.loading}>
-            <LottieView source={LoadingAnimation} autoPlay loop />
+            <LottieView source={LoadingAnimation} autoPlay={this.props.visible} loop={this.props.visible} />
           </View>
         </View>
       )
