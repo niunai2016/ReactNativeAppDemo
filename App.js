@@ -12,6 +12,7 @@ import {SafeAreaView} from 'react-navigation'
 import Router from './src/router';
 import {colors} from './src/assets/styles/colors-theme';
 import {handleNavigationChange} from './src/common/history';
+import {Provider} from '@ant-design/react-native'
 import LoadingView from './src/common/loading';
 
 export default class App extends Component {
@@ -24,24 +25,26 @@ export default class App extends Component {
 
   render() {
     return (
-      <SafeAreaView
-        style={{flex: 1, backgroundColor: colors.statusBarColor}}
-        forceInset={{
-          top: 'always',
-          bottom: 'always'
-        }}
-      >
-        <StatusBar
-          animated={true}
-          barStyle={'light-content'}
-          backgroundColor={colors.statusBarColor}
-          translucent={true}
-        />
-        <Router
-          onNavigationStateChange={handleNavigationChange}
-        />
-        <LoadingView visible={this.state.loadingCount > 0} />
-      </SafeAreaView>
+      <Provider>
+        <SafeAreaView
+          style={{flex: 1, backgroundColor: colors.statusBarColor}}
+          forceInset={{
+            top: 'always',
+            bottom: 'always'
+          }}
+        >
+          <StatusBar
+            animated={true}
+            barStyle={'light-content'}
+            backgroundColor={colors.statusBarColor}
+            translucent={true}
+          />
+          <Router
+            onNavigationStateChange={handleNavigationChange}
+          />
+          <LoadingView visible={this.state.loadingCount > 0} />
+        </SafeAreaView>
+      </Provider>
     );
   }
 }

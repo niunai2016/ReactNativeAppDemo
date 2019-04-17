@@ -70,6 +70,8 @@
 		<string>Octicons.ttf</string>
 		<string>SimpleLineIcons.ttf</string>
 		<string>Zocial.ttf</string>
+		<string>antfill.ttf</string>
+		<string>antoutline.ttf</string>
 	</array>
 </dict>
 </plist>
