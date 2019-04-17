@@ -247,6 +247,38 @@ export const TabNav = createBottomTabNavigator(TabRouterMap,{
 })
 ```
 
+e）在`App.js`中使用路由：
+
+```
+import React, {Component} from 'react';
+import {StatusBar} from 'react-native';
+import {SafeAreaView} from 'react-navigation'
+import Router from './src/router';
+import {colors} from './src/assets/styles/colors-theme';
+
+export default class App extends Component {
+  render() {
+    return (
+      <SafeAreaView
+        style={{flex: 1, backgroundColor: colors.statusBarColor}}
+        forceInset={{
+          top: 'always',
+          bottom: 'always'
+        }}
+      >
+        <StatusBar
+          animated={true}
+          barStyle={'light-content'}
+          backgroundColor={colors.statusBarColor}
+          translucent={true}
+        />
+        <Router/>
+      </SafeAreaView>
+    );
+  }
+}
+```
+
 **<a name="history">2.history的基本封装</a>**
 history是控制路由跳转的模块，一般封装出push、replace、goback、pop等，在`src`目录下新建`common/history.js`,示例如下：
 
@@ -316,6 +348,19 @@ const history = {
 }
 
 export default history;
+```
+
+修改`App.js`中的`Router`
+
+```
+<Router/>
+
+改为
+
+import {handleNavigationChange} from './src/common/history'
+<Router
+  onNavigationStateChange={handleNavigationChange}
+/>
 ```
 
 ## <a name="icon">字体图标库</a>
@@ -687,6 +732,74 @@ export default class BaseService {
 
 }
 
+```
+
+## 基础服务的使用
+
+**1.封装LoadingView**
+封装`LoadingView`是给全局提供一个加载动画，服务器的加载需要时间，一般以加载动画来过渡。目前我选择国际上最火的[lottie](http://airbnb.io/lottie/#/react-native),动画所需`json`文件自行去[lottiefiles](https://lottiefiles.com/recent)下载
+
+```
+$ yarn add lottie-react-native
+$ react-native link lottie-react-native
+```
+
+在`src/common`下新建`loading.js`, 同时在`src/assets`下新建`animations/loading.json`
+
+```
+import React, { Component } from 'react'
+import {View, Dimensions, StyleSheet} from 'react-native';
+import LottieView from 'lottie-react-native';
+import LoadingAnimation from '../assets/animations/loading';
+
+const { width, height } = Dimensions.get('window')
+
+export default class LoadingView extends Component {
+  render(){
+    if(this.props.visible){
+      return (
+        <View style={styles.wrapper}>
+          <View style={styles.loading}>
+            <LottieView source={LoadingAnimation} autoPlay={this.props.visible} loop={this.props.visible} />
+          </View>
+        </View>
+      )
+    }else{
+      return <View/>
+    }
+  }
+}
+
+const styles = StyleSheet.flatten({
+  wrapper: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: width,
+    height: height,
+    backgroundColor: 'rgba(0, 0, 0, 0.2)'
+  },
+  loading:{
+    position: 'absolute',
+    top: height / 2 - 100,
+    left: width / 2 - 70,
+    width: 140,
+    height: 140
+  }
+});
+```
+
+在`App.js`中使用`LoadingView`,引入LoadingView放在Router下方就行
+
+```
+import LoadingView from './src/common/loading'
+
+...
+<Router
+  onNavigationStateChange={handleNavigationChange}
+/>
+<LoadingView visible={this.state.loadingCount > 0} />
+...
 ```
 
 
