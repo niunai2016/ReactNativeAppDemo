@@ -5,7 +5,7 @@ import LoadingAnimation from '../assets/animations/loading';
 
 const { width, height } = Dimensions.get('window')
 
-export default class Loading extends Component {
+export default class LoadingView extends Component {
   render(){
     if(this.props.visible){
       return (
