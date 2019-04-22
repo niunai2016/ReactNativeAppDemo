@@ -1345,3 +1345,243 @@ $ yarn add @babel/cli @babel/plugin-proposal-class-properties @babel/plugin-prop
 }
 ```
 
+在`src`下新建`stores/app-store.js`和`stores/index.js`
+
+`stores/app-store.js`示例：
+
+```
+import {observable, action} from 'mobx'
+
+class AppStore {
+  @observable
+  list = []
+
+  @observable
+  timer = 0
+
+  @action
+  setList(data){
+    this.list = data
+  }
+
+  @action
+  resetTimer() {
+    this.timer = 0
+  }
+
+  @action
+  tick() {
+    this.timer += 1
+  }
+}
+
+const appStore = new AppStore()
+export {appStore}
+
+```
+
+`stores/index.js`示例：
+
+```
+import {appStore} from './app-store'
+
+export {appStore}
+
+```
+
+在`App.js`中新增`mobx`,具体使用参考[mobx中文文档](https://cn.mobx.js.org/)
+
+`App.js`示例：
+
+```
+...
+import { Provider, observer } from 'mobx-react'
+import * as stores from './src/stores/index';
+
+@observer
+export default class App extends Component {
+  ...
+
+  render() {
+    return (
+      <Provider rootStore={stores}>
+        ...
+      </Provider>
+    );
+  }
+}
+
+```
+
+在`home.js`中引入`mobx`, 统计点击list的次数和给List页传值
+
+```
+...
+import NaviBar from '../../components/navi-bar';
+import { inject, observer } from 'mobx-react';
+
+@inject('rootStore')
+@observer
+export default class Home extends Component {
+  constructor(props) {
+    ...
+    this.store = props.rootStore.appStore
+  }
+
+  render() {
+    return (
+      <View style={{flex: 1}}>
+        <NaviBar title={'Home'}/>
+        <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+          <Text>Home</Text>
+          <TouchableOpacity style={styles.button} onPress={() => {
+            //添加timer的次数
+            this.store.tick();
+            const list = this.store.list;
+
+            list.push({
+              number: this.store.timer,
+              label: '第'+this.store.timer + '次点击'
+            })
+
+            this.store.setList(list)
+            history.push(this, '/list', {name: 'niunai'})
+          }}>
+            <Text style={styles.buttonText}>跳转到List</Text>
+          </TouchableOpacity>
+          <View style={{marginTop: 30}}>
+            <Text>统计跳转到List的次数: {this.store.timer}</Text>
+          </View>
+          <TouchableOpacity style={[styles.button, {width: 140}]} onPress={() => {
+            this.store.setList([]);
+            this.store.resetTimer();
+          }}>
+            <Text style={styles.buttonText}>重置List和timer</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    )
+  }
+}
+```
+
+
+在`list.js`中引入`mobx`, 统计点击list的次数和渲染`list`
+
+```
+import React, { Component } from 'react'
+import {View, Text, TouchableOpacity, StyleSheet, Dimensions} from 'react-native'
+import NaviBar from '../../components/navi-bar';
+import history from '../../common/history';
+import {colors} from '../../assets/styles/colors-theme';
+import ListService from '../../services/list-service';
+import LoadingHoc from '../../hocs/loading-hoc';
+import {inject, observer} from 'mobx-react';
+
+const { width } = Dimensions.get('window')
+
+@LoadingHoc
+@inject('rootStore')
+@observer
+export default class List extends Component {
+  constructor(props) {
+    super(props)
+    this.state = {
+      list: [],
+      name: props.navigation.state.params.name
+    }
+    this.listService = new ListService(props)
+    this.store = props.rootStore.appStore
+  }
+
+  async componentDidMount() {
+    const res = await this.listService.getList();
+
+    if(res) {
+      this.setState({
+        list: res
+      })
+    }
+  }
+
+  render() {
+    return (
+      <View style={{flex: 1}}>
+        <NaviBar
+          title={'List列表页'}
+          onBack={history.goBack.bind(this, this)}
+        />
+        <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+          <View style={{marginBottom: 50}}>
+            <Text>Home页传过来的name:{this.state.name}</Text>
+          </View>
+          <View style={{marginBottom: 50}}>
+            <Text>统计到{this.store.timer}次跳转到List</Text>
+          </View>
+          <View style={{flexDirection: 'row', backgroundColor: '#ccc'}}>
+            <View style={styles.number}>
+              <Text>次数</Text>
+            </View>
+            <View style={styles.label}>
+              <Text>描述</Text>
+            </View>
+          </View>
+          {
+            this.store.list.map((item, index) => {
+              return (
+                <View style={{flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: '#ccc'}}>
+                  <View style={styles.number}>
+                    <Text>{item.number}</Text>
+                  </View>
+                  <View style={styles.label}>
+                    <Text>{item.label}</Text>
+                  </View>
+                </View>
+              )
+            })
+          }
+          <TouchableOpacity style={styles.button} onPress={() => history.push(this, '/detail', {name: 'suannai'})}>
+            <Text style={styles.buttonText}>跳转到Detail</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    )
+  }
+}
+
+const styles = StyleSheet.flatten({
+  button: {
+    marginTop: 20,
+    width: 100,
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.statusBarColor
+  },
+  buttonText: {
+    color: '#fff'
+  },
+  number: {
+    width: 0.3 * width,
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  label: {
+    width: 0.7 * width,
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center'
+  }
+})
+
+```
+
+**注意：本例中主要是通过在`App.js`中建立一个全局的`store`，命名为`rootStore`来控制所有页面的状态,
+在`home.js`页去触发`action`增加`timer`和`setList`以及重置`timer`和`list`,
+在`list.js`去渲染`timer`和`list`**
+
+
+## Demo总结
+至此，本文主要描述了如何构架一个react-native的APP，从基础搭建、全局的路由、路由`history`控制、全局`event`事件消息总线封装、全局`error`报错处理和监听、服务配置、基础`service`搭建到使用`mobx`进行全局状态监控就基本上讲完了，其中还包含了如何封装顶部导航栏`NaviBar`、引用字体图标库`react-native-vector-icons`、引入蚂蚁金服的`@ant-design/react-native`, 同时涉及到高阶组件`loading-hoc`的搭建使用和`lottie`动画的使用。
+

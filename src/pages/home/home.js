@@ -1,7 +1,6 @@
 import React, { Component } from 'react'
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native'
 import {colors} from '../../assets/styles/colors-theme';
-import { Modal } from '@ant-design/react-native'
 import history from '../../common/history';
 import NaviBar from '../../components/navi-bar';
 import { inject, observer } from 'mobx-react';
@@ -11,8 +10,7 @@ import { inject, observer } from 'mobx-react';
 export default class Home extends Component {
   constructor(props) {
     super(props)
-
-    console.log('@@@@ props', props)
+    this.store = props.rootStore.appStore
   }
 
   render() {
@@ -22,10 +20,28 @@ export default class Home extends Component {
         <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
           <Text>Home</Text>
           <TouchableOpacity style={styles.button} onPress={() => {
+            //添加timer的次数
+            this.store.tick();
+            const list = this.store.list;
+
+            list.push({
+              number: this.store.timer,
+              label: '第'+this.store.timer + '次点击'
+            })
+
+            this.store.setList(list)
             history.push(this, '/list', {name: 'niunai'})
-            // Modal.alert('温馨提示', 'message')
           }}>
             <Text style={styles.buttonText}>跳转到List</Text>
+          </TouchableOpacity>
+          <View style={{marginTop: 30}}>
+            <Text>统计跳转到List的次数: {this.store.timer}</Text>
+          </View>
+          <TouchableOpacity style={[styles.button, {width: 140}]} onPress={() => {
+            this.store.setList([]);
+            this.store.resetTimer();
+          }}>
+            <Text style={styles.buttonText}>重置List和timer</Text>
           </TouchableOpacity>
         </View>
       </View>
