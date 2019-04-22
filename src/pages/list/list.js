@@ -3,8 +3,10 @@ import {View, Text, TouchableOpacity, StyleSheet} from 'react-native'
 import NaviBar from '../../components/navi-bar';
 import history from '../../common/history';
 import {colors} from '../../assets/styles/colors-theme';
-import ListService from "../../services/list-service";
+import ListService from '../../services/list-service';
+import LoadingHoc from '../../hocs/loading-hoc';
 
+@LoadingHoc
 export default class List extends Component {
   constructor(props) {
     super(props)
@@ -17,8 +19,6 @@ export default class List extends Component {
 
   async componentDidMount() {
     const res = await this.listService.getList();
-
-    console.log('@@@@ res', res)
 
     if(res) {
       this.setState({

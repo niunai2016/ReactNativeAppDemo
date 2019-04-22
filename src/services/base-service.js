@@ -45,6 +45,7 @@ export default class BaseService {
     }
 
     let res = null
+    let timer = null
 
     try {
       const options = {
@@ -67,7 +68,12 @@ export default class BaseService {
       res = await fetchApi(url, options)
     } catch (e) {
       if(this.hideLoading){
-        this.hideLoading()
+        if(timer) {
+          clearTimeout(timer)
+        }
+        timer = setTimeout(() => {
+          this.hideLoading()
+        }, 2000)
       }
 
       throw new ServiceError(code.REQUEST_FAILED, '网络请求失败')
@@ -77,7 +83,7 @@ export default class BaseService {
       const contentType = res.headers.get('Content-Type')
 
       if(this.hideLoading){
-        this.hideLoading();
+        this.hideLoading()
       }
 
       if(contentType.indexOf('text/plain') >= 0 || contentType.indexOf('text/html') >= 0){
@@ -92,7 +98,13 @@ export default class BaseService {
       }
     } else {
       if(this.hideLoading){
-        this.hideLoading();
+        if(timer) {
+          clearTimeout(timer)
+        }
+
+        timer = setTimeout(() => {
+          this.hideLoading()
+        }, 2000)
       }
 
       if (res.status === 401) {
