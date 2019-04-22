@@ -1,6 +1,8 @@
 # ReactNativeAppDemo
 **ReactNativeAppDemo** 是一个以react-native+mobx为基础搭建的app案例，旨在让初学者了解基本的RNApp的搭建与应用。
 
+教程包含基础框架搭建、路由封装、导航栏封装、service封装、全局报错处理封装、高阶组件封装、全局事件消息总线封装...
+
 ## 支持平台
 - [x] IOS
 - [x] Android
@@ -645,6 +647,7 @@ export default class BaseService {
     }
 
     let res = null
+    let timer = null
 
     try {
       const options = {
@@ -667,7 +670,12 @@ export default class BaseService {
       res = await fetchApi(url, options)
     } catch (e) {
       if(this.hideLoading){
-        this.hideLoading()
+        if(timer) {
+          clearTimeout(timer)
+        }
+        timer = setTimeout(() => {
+          this.hideLoading()
+        }, 2000)
       }
 
       throw new ServiceError(code.REQUEST_FAILED, '网络请求失败')
@@ -677,7 +685,7 @@ export default class BaseService {
       const contentType = res.headers.get('Content-Type')
 
       if(this.hideLoading){
-        this.hideLoading();
+        this.hideLoading()
       }
 
       if(contentType.indexOf('text/plain') >= 0 || contentType.indexOf('text/html') >= 0){
@@ -692,7 +700,13 @@ export default class BaseService {
       }
     } else {
       if(this.hideLoading){
-        this.hideLoading();
+        if(timer) {
+          clearTimeout(timer)
+        }
+
+        timer = setTimeout(() => {
+          this.hideLoading()
+        }, 2000)
       }
 
       if (res.status === 401) {
@@ -730,6 +744,50 @@ export default class BaseService {
     return await this.request('POST', url, params, errorMsg, showLoading)
   }
 
+}
+```
+
+**使用`BaseService`**
+在`src/services`下新建`list-service.js`
+
+```
+/**
+ * 列表页服务
+ */
+import BaseService from './base-service';
+
+export default class ListService extends BaseService {
+  /**
+   * 获取列表
+   * @return {Promise<void>}
+   */
+  async getList() {
+    const res = await this.postJson('qryList.do', {})
+
+    return res;
+  }
+}
+```
+
+修改`list.js`
+
+```
+...
+import ListService from '../../services/list-service';
+
+export default class List extends Component {
+  constructor(props) {
+    super(props)
+    ...
+    this.listService = new ListService(props)
+  }
+
+  async componentDidMount() {
+    const res = await this.listService.getList();
+    ...
+  }
+
+  ...
 }
 
 ```
@@ -802,4 +860,359 @@ import LoadingView from './src/common/loading'
 ...
 ```
 
+**2.loading-hoc高阶组件封装**
+
+在`src`下新建`hocs/loading-hoc.js`, loading-hoc是一个高阶组件，用于在页面外部以`@`修饰符引用`LoadingHoc`(查看<a name="event">Event</a>事件消息总线封装)
+
+```
+import React, {Component} from 'react';
+import {Dimensions, View} from 'react-native';
+const { width, height } = Dimensions.get('window')
+import Event from '../common/event'
+
+export default function LoadingHoc(WrappedComponent) {
+  return class ComposedComponent extends Component {
+    showLoading(){
+      Event.emit('SHOW_LOADING')
+    }
+
+    hideLoading(){
+      Event.emit('HIDE_LOADING')
+    }
+
+    render() {
+      const props = {...this.props, ...{
+          showLoading: this.showLoading.bind(this),
+          hideLoading: this.hideLoading.bind(this)
+        }};
+      return (
+        <View style={{width, height}}>
+          <WrappedComponent  {...props} />
+        </View>
+      );
+    }
+  };
+}
+
+```
+
+在`List`中引入`LoadingHoc`
+
+
+```
+...
+@LoadingHoc
+export default class List extends Component {
+  constructor(props) {
+    super(props)
+    ...
+    this.listService = new ListService(props)
+  }
+
+  async componentDidMount() {
+    const res = await this.listService.getList();
+    ...
+  }
+}
+
+```
+
+**3.全局事件消息总线封装**
+在`src/common`下新建`notification-center.js`和`event.js`
+
+
+notification-center.js示例：
+
+```
+const __notices = [];
+/**
+ * addNotification
+ * 注册通知对象方法
+ *
+ * 参数:
+ * name： 注册名，一般let在公共类中
+ * selector： 对应的通知方法，接受到通知后进行的动作
+ * observer: 注册对象，指Page对象
+ */
+function addNotification(name, selector, observer) {
+  if (name && selector) {
+    if (!observer) {
+      console.log(
+        "addNotification Warning: no observer will can't remove notice"
+      );
+    }
+    const newNotice = {
+      name: name,
+      selector: selector,
+      observer: observer
+    };
+
+    addNotices(newNotice);
+  } else {
+    console.log('addNotification error: no selector or name');
+  }
+}
+
+/**
+ * 仅添加一次监听
+ *
+ * 参数:
+ * name： 注册名，一般let在公共类中
+ * selector： 对应的通知方法，接受到通知后进行的动作
+ * observer: 注册对象，指Page对象
+ */
+function addOnceNotification(name, selector, observer) {
+  if (__notices.length > 0) {
+    for (let i = 0; i < __notices.length; i++) {
+      const notice = __notices[i];
+      if (notice.name === name) {
+        if (notice.observer === observer) {
+          return;
+        }
+      }
+    }
+  }
+  this.addNotification(name, selector, observer);
+}
+
+function addNotices(newNotice) {
+  // if (__notices.length > 0) {
+  //     for (var i = 0; i < __notices.length; i++) {
+  //         var hisNotice = __notices[i];
+  //         //当名称一样时进行对比，如果不是同一个 则放入数组，否则跳出
+  //         if (newNotice.name === hisNotice.name) {
+  //             if (!cmp(hisNotice, newNotice)) {
+  //                 __notices.push(newNotice);
+  //             }
+  //             return;
+  //         }else{
+  //             __notices.push(newNotice);
+  //         }
+
+  //     }
+  // } else {
+
+  // }
+
+  __notices.push(newNotice);
+}
+
+/**
+ * removeNotification
+ * 移除通知方法
+ *
+ * 参数:
+ * name: 已经注册了的通知
+ * observer: 移除的通知所在的Page对象
+ */
+
+function removeNotification(name, observer) {
+  console.log('removeNotification:' + name);
+  for (let i = 0; i < __notices.length; i++) {
+    const notice = __notices[i];
+    if (notice.name === name) {
+      if (notice.observer === observer) {
+        __notices.splice(i, 1);
+        return;
+      }
+    }
+  }
+}
+
+/**
+ * postNotificationName
+ * 发送通知方法
+ *
+ * 参数:
+ * name: 已经注册了的通知
+ * info: 携带的参数
+ */
+
+function postNotificationName(name, info) {
+  console.log('postNotificationName:' + name);
+  if (__notices.length === 0) {
+    console.log("postNotificationName error: u hadn't add any notice.");
+    return;
+  }
+
+  for (let i = 0; i < __notices.length; i++) {
+    const notice = __notices[i];
+    if (notice.name === name) {
+      notice.selector(info);
+    }
+  }
+}
+
+// 用于对比两个对象是否相等
+function cmp(x, y) { // eslint-disable-line
+                     // If both x and y are null or undefined and exactly the same
+  if (x === y) {
+    return true;
+  }
+
+  // If they are not strictly equal, they both need to be Objects
+  if (!(x instanceof Object) || !(y instanceof Object)) {
+    return false;
+  }
+
+  // They must have the exact same prototype chain, the closest we can do is
+  // test the constructor.
+  if (x.constructor !== y.constructor) {
+    return false;
+  }
+
+  for (const p in x) {
+    // Inherited properties were tested using x.constructor === y.constructor
+    if (x.hasOwnProperty(p)) {
+      // Allows comparing x[ p ] and y[ p ] when set to undefined
+      if (!y.hasOwnProperty(p)) {
+        return false;
+      }
+
+      // If they have the same strict value or identity then they are equal
+      if (x[p] === y[p]) {
+        continue;
+      }
+
+      // Numbers, Strings, Functions, Booleans must be strictly equal
+      if (typeof x[p] !== 'object') {
+        return false;
+      }
+
+      // Objects and Arrays must be tested recursively
+      if (!Object.equals(x[p], y[p])) {
+        return false;
+      }
+    }
+  }
+
+  for (const p in y) {
+    // allows x[ p ] to be set to undefined
+    if (y.hasOwnProperty(p) && !x.hasOwnProperty(p)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+module.exports = {
+  addNotification: addNotification,
+  removeNotification: removeNotification,
+  postNotificationName: postNotificationName,
+  addOnceNotification: addOnceNotification
+};
+
+```
+
+
+event.js示例：
+
+```
+/**
+ * 一个JavaScript 事件消息总线
+ */
+import NotificationCenter from './notification-center';
+
+export default class Event {
+  static listen(eventName, callback, observer) {
+    NotificationCenter.addNotification(eventName, callback, observer);
+  }
+  static emit(eventName, params) {
+    NotificationCenter.postNotificationName(eventName, params);
+  }
+  static remove(eventName, observer) {
+    NotificationCenter.removeNotification(eventName, observer);
+  }
+}
+
+```
+
+
+**4.全局报错处理**
+在`src/common`下新建`global-error-handler.js`
+
+
+global-error-handler.js示例：
+
+
+```
+import code from './code';
+import Event from './event'
+
+export function handleErrors(error){
+  if(error && error.signature && error.signature === 'ServiceError') {
+    defaultServiceErrorHandler(error);
+  }else{
+    defaultErrorHandler(error);
+  }
+}
+
+function defaultServiceErrorHandler(error){
+  if(error && error.code === code.SESSION_TIMEOUT){
+    Event.emit('GLOBAL_ERROR', {
+      type: 'SESSION_TIMEOUT'
+    })
+  }else if(error && error.message) {
+    Event.emit('GLOBAL_ERROR', {
+      type: 'SERVICE_ERROR',
+      message: error.message
+    })
+  }else {
+    Event.emit('GLOBAL_ERROR', {
+      type: 'SERVICE_ERROR',
+      message: '服务出错，请稍后再试.'
+    })
+  }
+}
+
+function defaultErrorHandler(error){
+  if(error && error.message) {
+    Event.emit('GLOBAL_ERROR', {
+      type: 'SERVICE_ERROR',
+      message: error.message
+    })
+  }else {
+    Event.emit('GLOBAL_ERROR', {
+      type: 'SERVICE_ERROR',
+      message: '服务出错，请稍后再试.'
+    })
+  }
+}
+
+```
+
+
+**5.全局监听**
+
+```
+$ yarn add promise-polyfill
+```
+
+## mobx的使用
+
+```
+$ yarn add mobx mobx-react
+$ yarn add @babel/cli @babel/plugin-proposal-class-properties @babel/plugin-proposal-decorators @babel/plugin-proposal-object-rest-spread @babel/plugin-transform-classes @babel/plugin-transform-flow-strip-types @babel/plugin-transform-runtime @babel/polyfill @babel/preset-env @babel/preset-flow @babel/preset-react babel-loader babel-plugin-module-resolver babel-plugin-transform-runtime babel-polyfill babel-preset-es2015 babel-preset-react babel-preset-react-native babel-preset-react-native-stage-0 babel-preset-react-native-syntax -D
+```
+
+`.babelrc`或`babel.config.js`添加如下代码：
+
+```
+{
+  presets: ['module:metro-react-native-babel-preset', '@babel/preset-flow'],
+  plugins: [
+    '@babel/transform-flow-strip-types',
+    [
+      '@babel/plugin-proposal-decorators', { 'legacy' : true }
+    ],
+    [
+      '@babel/plugin-proposal-class-properties', {'loose': true}
+    ],
+    [
+      '@babel/plugin-transform-runtime', {}
+    ],
+    ['import', { 'libraryName': '@ant-design/react-native' }]
+  ]
+}
+```
 
