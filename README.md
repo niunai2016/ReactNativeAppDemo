@@ -801,6 +801,9 @@ export default class List extends Component {
 $ yarn add lottie-react-native
 $ react-native link lottie-react-native
 $ react-native link lottie-ios
+
+针对IOS的XCode配置
+General > Embedded Binaries > add Lottie.framework
 ```
 
 在`src/common`下新建`loading.js`, 同时在`src/assets`下新建`animations/loading.json`
@@ -1322,7 +1325,7 @@ export default class App extends Component {
 
 ```
 $ yarn add mobx mobx-react
-$ yarn add @babel/cli @babel/plugin-proposal-class-properties @babel/plugin-proposal-decorators @babel/plugin-proposal-object-rest-spread @babel/plugin-transform-classes @babel/plugin-transform-flow-strip-types @babel/plugin-transform-runtime @babel/polyfill @babel/preset-env @babel/preset-flow @babel/preset-react babel-loader babel-plugin-module-resolver babel-plugin-transform-runtime babel-polyfill babel-preset-es2015 babel-preset-react babel-preset-react-native babel-preset-react-native-stage-0 babel-preset-react-native-syntax -D
+$ yarn add @babel/cli @babel/plugin-proposal-class-properties @babel/plugin-proposal-decorators @babel/plugin-proposal-object-rest-spread @babel/plugin-transform-classes @babel/plugin-transform-flow-strip-types @babel/plugin-transform-runtime @babel/polyfill @babel/preset-env @babel/preset-flow @babel/preset-react babel-loader babel-plugin-import babel-plugin-module-resolver babel-plugin-transform-runtime babel-polyfill babel-preset-es2015 babel-preset-react babel-preset-react-native babel-preset-react-native-stage-0 babel-preset-react-native-syntax -D
 ```
 
 `.babelrc`或`babel.config.js`添加如下代码：
