@@ -800,6 +800,7 @@ export default class List extends Component {
 ```
 $ yarn add lottie-react-native
 $ react-native link lottie-react-native
+$ react-native link lottie-ios
 ```
 
 在`src/common`下新建`loading.js`, 同时在`src/assets`下新建`animations/loading.json`
