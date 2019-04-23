@@ -7,6 +7,9 @@
 - [x] IOS
 - [x] Android
 
+## 效果图
+![img](https://github.com/niunai2016/ReactNativeAppDemo/blob/master/images-folder/app.gif)
+
 ## 基础环境搭建
 按照[react-native中文官网](https://reactnative.cn/docs/getting-started/)搭建基础环境
 
