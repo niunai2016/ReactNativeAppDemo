@@ -53,7 +53,7 @@ $ react-native link react-native-gesture-handler
 
 a）`home.js`示例：（所用的<a href="#history">history</a>及<a href="#colors">colors</a>在后文也有示例）
 
-```
+```js
 import React, { Component } from 'react'
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native'
 import {colors} from '../../assets/styles/colors-theme';
@@ -91,7 +91,7 @@ b）在`pages`下新建`page1/page1.js`、`page2/page2.js`、`page3/page3.js`、
 
 `page1`示例:
 
-```
+```js
 import React, { Component } from 'react'
 import { View, Text } from 'react-native'
 
@@ -108,7 +108,7 @@ export default class Page1 extends Component {
 
 c）在`pages`下新建`router.js`，示例如下（`tab-nav`下文会讲到）：
 
-```
+```js
 import {createStackNavigator, createAppContainer} from 'react-navigation'
 import List from './pages/list/list';
 import Detail from './pages/detail/detail';
@@ -140,7 +140,7 @@ export default Router
 
 d）`tab-nav`的封装： `src`目录下新建`common/tab-nav.js`,示例如下(<a href="#icon">Icon</a> 下文有介绍)：
 
-```
+```js
 import React from 'react'
 import Icon from 'react-native-vector-icons/Ionicons'
 import {createBottomTabNavigator} from 'react-navigation';
@@ -254,7 +254,7 @@ export const TabNav = createBottomTabNavigator(TabRouterMap,{
 
 e）在`App.js`中使用路由：
 
-```
+```js
 import React, {Component} from 'react';
 import {StatusBar} from 'react-native';
 import {SafeAreaView} from 'react-navigation'
@@ -287,7 +287,7 @@ export default class App extends Component {
 **<a name="history">2.history的基本封装</a>**
 history是控制路由跳转的模块，一般封装出push、replace、goback、pop等，在`src`目录下新建`common/history.js`,示例如下：
 
-```
+```js
 const NAVIGATION_THROTTLE = 1000; // 1s内不准重复跳转
 const lastNavigationTimeStamps = {};
 
@@ -357,7 +357,7 @@ export default history;
 
 修改`App.js`中的`Router`
 
-```
+```js
 <Router/>
 
 改为
@@ -371,7 +371,7 @@ import {handleNavigationChange} from './src/common/history'
 ## <a name="icon">字体图标库</a>
 app中需要用到大量的小图标，本文选择[react-native-vector-icons](https://oblador.github.io/react-native-vector-icons/)
 
-```
+```js
 $ yarn add react-native-vector-icons
 $ react-native link react-native-vector-icons
 
@@ -389,7 +389,7 @@ import Icon from 'react-native-vector-icons/Ionicons'
 **<a name="colors">1.样式配置</a>**
 `src`目录下新建`assets/styles/colors-theme.js`示例：全局控制整个APP所需的颜色
 
-```
+```js
 export const colors = {
   statusBarColor: '#23A2FF'
 }
@@ -398,7 +398,7 @@ export const colors = {
 **<a name="constants">2.服务基础配置</a>**
 `src/common`目录下新建`constants.js`, 用于配置全局所需的服务地址、设备号、设备类型、版本号、分页数量等等
 
-```
+```js
 (如果不需要设备号则无需下载)
 $ yarn add react-native-device-info
 $ react-native link react-native-device-info
@@ -424,7 +424,7 @@ export default {
 **<a name="serviceError">3.服务报错配置</a>**
 `src/common`目录下新建`service-error.js`, 用于配置全局服务报错
 
-```
+```js
 /**
  * 服务报错处理
  */
@@ -442,7 +442,7 @@ export default class ServiceError extends Error{
 **<a name="code">4.code配置</a>**
 `src/common`目录下新建`code.js`, 用于配置全局请求code
 
-```
+```js
 /**
  * code.js提供全局的请求服务字段处理
  */
@@ -466,7 +466,7 @@ $ yarn add prop-types
 ```
 
 在`src`下新建`components/navi-bar.js`,示例如下：
-```
+```js
 import React, { Component } from 'react'
 import { View, Text, StyleSheet, Dimensions, TouchableOpacity, Platform } from 'react-native'
 import PropTypes from 'prop-types'
@@ -532,7 +532,7 @@ const styles = StyleSheet.flatten({
 
 修改`list.js`,示例如下：
 
-```
+```js
 import React, { Component } from 'react'
 import {View, Text, TouchableOpacity, StyleSheet} from 'react-native'
 import NaviBar from '../../components/navi-bar';
@@ -577,7 +577,7 @@ const styles = StyleSheet.flatten({
 一般来说，大项目都需要统一封装一个基础服务组件，通过这个组件去全局处理request和返回response，处理全局的服务报错。
 
 1.`fetch`拦截器的实现：
-```
+```js
 $ yarn add fetch-intercept
 
 示例如下：
@@ -602,7 +602,7 @@ fetchIntercept.register({
 
 2.在`src`下新建`services/base-service.js`,封装`BaseService`（<a href="#constants">constants</a>、<a href="#serviceError">ServiceError</a>、<a href="#code">code</a>的封装在上面）
 
-```
+```js
 /**
  * 基础服务类封装
  * BaseService
@@ -753,7 +753,7 @@ export default class BaseService {
 **使用`BaseService`**
 在`src/services`下新建`list-service.js`
 
-```
+```js
 /**
  * 列表页服务
  */
@@ -800,7 +800,7 @@ export default class List extends Component {
 **1.封装LoadingView**
 封装`LoadingView`是给全局提供一个加载动画，服务器的加载需要时间，一般以加载动画来过渡。目前我选择国际上最火的[lottie](http://airbnb.io/lottie/#/react-native),动画所需`json`文件自行去[lottiefiles](https://lottiefiles.com/recent)下载
 
-```
+```js
 $ yarn add lottie-react-native
 $ react-native link lottie-react-native
 $ react-native link lottie-ios
@@ -811,7 +811,7 @@ General > Embedded Binaries > add Lottie.framework
 
 在`src/common`下新建`loading.js`, 同时在`src/assets`下新建`animations/loading.json`
 
-```
+```js
 import React, { Component } from 'react'
 import {View, Dimensions, StyleSheet} from 'react-native';
 import LottieView from 'lottie-react-native';
@@ -856,7 +856,7 @@ const styles = StyleSheet.flatten({
 
 在`App.js`中使用`LoadingView`,引入LoadingView放在Router下方就行
 
-```
+```js
 import LoadingView from './src/common/loading'
 
 ...
@@ -871,7 +871,7 @@ import LoadingView from './src/common/loading'
 
 在`src`下新建`hocs/loading-hoc.js`, loading-hoc是一个高阶组件，用于在页面外部以`@`修饰符引用`LoadingHoc`(查看<a name="event">Event</a>事件消息总线封装)
 
-```
+```js
 import React, {Component} from 'react';
 import {Dimensions, View} from 'react-native';
 const { width, height } = Dimensions.get('window')
@@ -906,7 +906,7 @@ export default function LoadingHoc(WrappedComponent) {
 在`List`中引入`LoadingHoc`
 
 
-```
+```js
 ...
 @LoadingHoc
 export default class List extends Component {
@@ -930,7 +930,7 @@ export default class List extends Component {
 
 notification-center.js示例：
 
-```
+```js
 const __notices = [];
 /**
  * addNotification
@@ -1114,7 +1114,7 @@ module.exports = {
 
 event.js示例：
 
-```
+```js
 /**
  * 一个JavaScript 事件消息总线
  */
@@ -1142,7 +1142,7 @@ export default class Event {
 global-error-handler.js示例：
 
 
-```
+```js
 import code from './code';
 import Event from './event'
 
@@ -1191,7 +1191,7 @@ function defaultErrorHandler(error){
 
 **5.全局监听**
 
-```
+```js
 $ yarn add promise-polyfill
 $ yarn add @ant-design/react-native
 $ react-native link @ant-design/icons-react-native
@@ -1201,7 +1201,7 @@ $ react-native link @ant-design/icons-react-native
 
 注：**如果需要使用`Modal`以及`Toast`还需要在 `App` 的入口处加上`Provider`, 因`mobx`也需要使用`Provider`, 本文另定义为`ProviderAntd`, `mobx`的使用教程在下面可找到**
 
-```
+```js
 import {Provider as ProviderAntd, Modal} from '@ant-design/react-native'
 import LoadingView from './src/common/loading';
 import {handleErrors} from './src/common/global-error-handler';
@@ -1333,7 +1333,7 @@ $ yarn add @babel/cli @babel/plugin-proposal-class-properties @babel/plugin-prop
 
 `.babelrc`或`babel.config.js`添加如下代码：
 
-```
+```js
 {
   presets: ['module:metro-react-native-babel-preset', '@babel/preset-flow'],
   plugins: [
@@ -1356,7 +1356,7 @@ $ yarn add @babel/cli @babel/plugin-proposal-class-properties @babel/plugin-prop
 
 `stores/app-store.js`示例：
 
-```
+```js
 import {observable, action} from 'mobx'
 
 class AppStore {
@@ -1400,7 +1400,7 @@ export {appStore}
 
 `App.js`示例：
 
-```
+```js
 ...
 import { Provider, observer } from 'mobx-react'
 import * as stores from './src/stores/index';
@@ -1422,7 +1422,7 @@ export default class App extends Component {
 
 在`home.js`中引入`mobx`, 统计点击list的次数和给List页传值
 
-```
+```js
 ...
 import NaviBar from '../../components/navi-bar';
 import { inject, observer } from 'mobx-react';
@@ -1475,7 +1475,7 @@ export default class Home extends Component {
 
 在`list.js`中引入`mobx`, 统计点击list的次数和渲染`list`
 
-```
+```js
 import React, { Component } from 'react'
 import {View, Text, TouchableOpacity, StyleSheet, Dimensions} from 'react-native'
 import NaviBar from '../../components/navi-bar';
