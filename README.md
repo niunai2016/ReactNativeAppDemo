@@ -774,7 +774,7 @@ export default class ListService extends BaseService {
 
 修改`list.js`
 
-```
+```js
 ...
 import ListService from '../../services/list-service';
 
